@@ -1,10 +1,10 @@
 import axios from 'axios';
 
-const API_URI = 'https://localhost:7271/api/OpeningHours';
+const apiUrl = import.meta.env.VITE_API_BASE_URL;
 
 export async function getOpeningHours() {
     try {
-        const response = await axios.get(`${API_URI}/all`);
+        const response = await axios.get(`${apiUrl}/all`);
         console.log("Opening hours retrieved successfully: ", response.data);
         return response.data;
     } catch (error) {

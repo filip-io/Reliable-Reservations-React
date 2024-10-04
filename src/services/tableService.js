@@ -1,10 +1,10 @@
 import axios from 'axios';
 
-const API_URI = 'https://localhost:7271/api/Table';
+const apiUrl = import.meta.env.VITE_API_BASE_URL;
 
 export async function getTables() {
     try {
-        const response = await axios.get(`${API_URI}/all`);
+        const response = await axios.get(`${apiUrl}/all`);
         console.log("Tables fetched successfully: ", response.data);
         return response.data;
     } catch (error) {

@@ -1,84 +1,98 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { getReservationsByDate } from '../services/reservationService';
+import { getReservationsByDate, postReservation } from '../services/reservationService';
 import { getTables } from '../services/tableService';
 import { getOpeningHours } from '../services/openingHoursService';
-import { postReservation } from '../services/reservationService';
+import { createUser } from '../services/customerService';
+import NumberOfPersonsStep from '../components/reservation/steps/NumberOfPersonsStep';
+import DateSelectionStep from '../components/reservation/steps/DateSelectionStep';
+import MealSelectionStep from '../components/reservation/steps/MealSelectionStep';
+import TimeSelectionStep from '../components/reservation/steps/TimeSelectionStep';
+import TableSelectionStep from '../components/reservation/steps/TableSelectionStep';
+import SpecialRequestsStep from '../components/reservation/steps/SpecialRequestsStep';
+import PersonalDetailsStep from '../components/reservation/steps/PersonalDetailsStep';
 
 function ReservePage() {
   const [currentStep, setCurrentStep] = useState(1);
-  const [numberOfPersons, setNumberOfPersons] = useState(0);
-  const [selectedDate, setSelectedDate] = useState('');
-  const [availableMeals, setAvailableMeals] = useState(['Brunch', 'Lunch', 'Dinner']);
-  const [selectedMeal, setSelectedMeal] = useState('');
-  const [availableTimes, setAvailableTimes] = useState([]);
-  const [selectedTables, setSelectedTables] = useState([]);
-  const [specialRequests, setSpecialRequests] = useState('');
-  const [personalDetails, setPersonalDetails] = useState({
-    firstName: '',
-    lastName: '',
-    phoneNumber: '',
-    email: '',
+  const [reservationData, setReservationData] = useState({
+    numberOfPersons: 0,
+    selectedDate: '',
+    selectedMeal: '',
+    selectedTime: '',
+    selectedTables: [],
+    specialRequests: '',
+    personalDetails: {
+      firstName: '',
+      lastName: '',
+      phoneNumber: '',
+      email: '',
+    },
   });
+  const [availableTables, setAvailableTables] = useState([]);
+  const [availableTimes, setAvailableTimes] = useState([]);
   const [reservations, setReservations] = useState([]);
 
   useEffect(() => {
-    const fetchTables = async () => {
-      const response = await axios.get(`${API_URI}/all`);
-      console.log("Tables fetched successfully: ", response.data);
-      setAvailableTables(response.data);
-    };
     fetchTables();
-  }, []);
-
-  useEffect(() => {
-    const fetchOpeningHours = async () => {
-      const response = await axios.get(`${API_URI}/all`);
-      console.log("Opening hours retrieved successfully: ", response.data);
-      // Add logic to handle opening hours
-    };
     fetchOpeningHours();
   }, []);
 
-  const handleNextStep = () => {
-    if (currentStep < 7) {
-      setCurrentStep((prevStep) => prevStep + 1);
-    } else {
-      // Handle the final step
+  useEffect(() => {
+    if (reservationData.selectedDate && reservationData.selectedMeal) {
+      fetchReservations();
+    }
+  }, [reservationData.selectedDate, reservationData.selectedMeal]);
+
+  const fetchTables = async () => {
+    try {
+      const tables = await getTables();
+      setAvailableTables(tables);
+    } catch (error) {
+      console.error("Error fetching tables:", error);
     }
   };
 
-  const handleMealSelection = () => {
-    if (!selectedMeal) {
-      console.log("No meal selected.");
-      return;
+  const fetchOpeningHours = async () => {
+    try {
+      const hours = await getOpeningHours();
+      // Handle opening hours logic here
+    } catch (error) {
+      console.error("Error fetching opening hours:", error);
     }
+  };
 
-    let timeSlots = [];
+  const fetchReservations = async () => {
+    try {
+      const fetchedReservations = await getReservationsByDate(reservationData.selectedDate);
+      setReservations(fetchedReservations);
+      updateAvailableTimes();
+    } catch (error) {
+      console.error("Error fetching reservations:", error);
+    }
+  };
+
+  const updateAvailableTimes = () => {
+    const { selectedMeal } = reservationData;
     let startHour, endHour;
 
-    // Determine start and end hours based on the selected meal
     switch (selectedMeal) {
       case 'Brunch':
         startHour = 10;
-        endHour = 12; // Brunch ends at 12
+        endHour = 12;
         break;
       case 'Lunch':
         startHour = 12;
-        endHour = 14; // Lunch ends at 14
+        endHour = 14;
         break;
       case 'Dinner':
         startHour = 15;
-        endHour = 23; // Dinner ends at 23
+        endHour = 23;
         break;
       default:
         console.log("Invalid meal selection:", selectedMeal);
         return;
     }
 
-    console.log(`Generating time slots from ${startHour}:00 to ${endHour}:00`);
-
-    // Generate available time slots in 30-minute increments
+    const timeSlots = [];
     for (let hour = startHour; hour < endHour; hour++) {
       for (let minute = 0; minute < 60; minute += 30) {
         const timeSlot = `${hour.toString().padStart(2, '0')}:${minute === 0 ? '00' : '30'}`;
@@ -86,15 +100,58 @@ function ReservePage() {
       }
     }
 
-    // Log the generated time slots before filtering
-    console.log("Generated Time Slots Before Filtering:", timeSlots);
-
-    // Remove booked times from timeSlots
     const bookedTimes = reservations.map((reservation) => reservation.time);
     const filteredTimes = timeSlots.filter((time) => !bookedTimes.includes(time) && time <= '21:30');
 
-    // Update availableTimes with the filtered times
     setAvailableTimes(filteredTimes);
+  };
+
+  const handleNextStep = () => {
+    if (currentStep < 7) {
+      setCurrentStep((prevStep) => prevStep + 1);
+    }
+  };
+
+  const handleInputChange = (field, value) => {
+    setReservationData((prevData) => ({
+      ...prevData,
+      [field]: value,
+    }));
+  };
+
+  const handlePersonalDetailsChange = (field, value) => {
+    setReservationData((prevData) => ({
+      ...prevData,
+      personalDetails: {
+        ...prevData.personalDetails,
+        [field]: value,
+      },
+    }));
+  };
+
+  const handleSubmit = async (personalDetails) => {
+    try {
+      let customerId = personalDetails.customerId;
+
+      if (!personalDetails.isExistingUser) {
+        const newUser = await createUser(personalDetails);
+        customerId = newUser.customerId;
+      }
+
+      const reservationData = {
+        customerId: customerId,
+        reservationDate: `${reservationData.selectedDate}T${reservationData.selectedTime}:00.000Z`,
+        numberOfGuests: reservationData.numberOfPersons,
+        tableNumbers: reservationData.selectedTables.map(table => table.number),
+        specialRequests: reservationData.specialRequests
+      };
+
+      await postReservation(reservationData);
+      // Handle successful reservation (e.g., show confirmation, reset form)
+    } catch (error) {
+      console.error("Error posting reservation:", error);
+      // Handle error (e.g., show error message to user)
+    }
   };
 
   return (
@@ -103,124 +160,64 @@ function ReservePage() {
       <p>Book a table at our restaurant and enjoy an amazing dining experience.</p>
 
       {currentStep === 1 && (
-        <div>
-          <h2>Select Number of Persons</h2>
-          {[1, 2, 3, 4, 5, 6, 7, 8].map((num) => (
-            <button
-              key={num}
-              onClick={() => {
-                setNumberOfPersons(num);
-                handleNextStep();
-              }}
-            >
-              {num}
-            </button>
-          ))}
-        </div>
+        <NumberOfPersonsStep
+          onSelect={(number) => {
+            handleInputChange('numberOfPersons', number);
+            handleNextStep();
+          }}
+        />
       )}
 
       {currentStep === 2 && (
-        <div>
-          <h2>Select a Date</h2>
-          <input
-            type="date"
-            value={selectedDate}
-            onChange={(e) => setSelectedDate(e.target.value)}
-          />
-          <button onClick={handleNextStep}>Next</button>
-        </div>
+        <DateSelectionStep
+          selectedDate={reservationData.selectedDate}
+          onDateChange={(date) => handleInputChange('selectedDate', date)}
+          onNext={handleNextStep}
+        />
       )}
 
       {currentStep === 3 && (
-        <div>
-          <h2>Select a Meal</h2>
-          {availableMeals.map((meal) => (
-            <button
-              key={meal}
-              onClick={() => {
-                setSelectedMeal(meal);
-                handleMealSelection();
-              }}
-            >
-              {meal}
-            </button>
-          ))}
-        </div>
+        <MealSelectionStep
+          onSelect={(meal) => {
+            handleInputChange('selectedMeal', meal);
+            handleNextStep();
+          }}
+        />
       )}
 
       {currentStep === 4 && (
-        <div>
-          <h2>Select a Time</h2>
-          {availableTimes.map((time) => (
-            <button
-              key={time}
-              onClick={() => {
-                handleNextStep();
-              }}
-            >
-              {time}
-            </button>
-          ))}
-        </div>
+        <TimeSelectionStep
+          availableTimes={availableTimes}
+          onSelect={(time) => {
+            handleInputChange('selectedTime', time);
+            handleNextStep();
+          }}
+        />
       )}
 
       {currentStep === 5 && (
-        <div>
-          <h2>Select Tables</h2>
-          {availableTables.map((table) => (
-            <button
-              key={table.id}
-              onClick={() => {
-                setSelectedTables((prev) => [...prev, table]);
-              }}
-            >
-              Table {table.number}
-            </button>
-          ))}
-          <button onClick={handleNextStep}>Next</button>
-        </div>
+        <TableSelectionStep
+          availableTables={availableTables}
+          selectedTables={reservationData.selectedTables}
+          onSelect={(tables) => handleInputChange('selectedTables', tables)}
+          onNext={handleNextStep}
+        />
       )}
 
       {currentStep === 6 && (
-        <div>
-          <h2>Special Requests</h2>
-          <textarea
-            value={specialRequests}
-            onChange={(e) => setSpecialRequests(e.target.value)}
-          />
-          <button onClick={handleNextStep}>Next</button>
-        </div>
+        <SpecialRequestsStep
+          specialRequests={reservationData.specialRequests}
+          onChange={(requests) => handleInputChange('specialRequests', requests)}
+          onNext={handleNextStep}
+        />
       )}
 
       {currentStep === 7 && (
-        <div>
-          <h2>Your Personal Details</h2>
-          <input
-            type="text"
-            placeholder="First Name"
-            value={personalDetails.firstName}
-            onChange={(e) => setPersonalDetails({ ...personalDetails, firstName: e.target.value })}
-          />
-          <input
-            type="text"
-            placeholder="Last Name"
-            value={personalDetails.lastName}
-            onChange={(e) => setPersonalDetails({ ...personalDetails, lastName: e.target.value })}
-          />
-          <input
-            type="text"
-            placeholder="Phone Number"
-            value={personalDetails.phoneNumber}
-            onChange={(e) => setPersonalDetails({ ...personalDetails, phoneNumber: e.target.value })}
-          />
-          <input
-            type="email"
-            placeholder="Email"
-            value={personalDetails.email}
-            onChange={(e) => setPersonalDetails({ ...personalDetails, email: e.target.value })}
-          />
-          <button onClick={postReservation}>Confirm Reservation</button>
-        </div>
+        <PersonalDetailsStep
+          personalDetails={reservationData.personalDetails}
+          onChange={handlePersonalDetailsChange}
+          onSubmit={handleSubmit}
+        />
       )}
     </div>
   );
