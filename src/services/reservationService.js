@@ -14,8 +14,9 @@ export async function getReservationsByDate(date) {
 }
 
 export async function postReservation(reservationData) {
+    console.log(reservationData)
     try {
-        const response = await axios.post(`${apiUrl}/create`, reservationData);
+        const response = await axios.post(`${apiUrl}/Reservation/create`, reservationData);
         console.log("Reservation created successfully: ", response.data);
         return response.data;
     } catch (error) {

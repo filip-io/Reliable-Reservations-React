@@ -19,7 +19,7 @@ function ReservePage() {
     selectedMeal: '',
     selectedTime: '',
     selectedTables: [],
-    specialRequests: '',
+    specialRequests: 'None',
     personalDetails: {
       firstName: '',
       lastName: '',
@@ -27,9 +27,11 @@ function ReservePage() {
       email: '',
     },
   });
+
   const [availableTables, setAvailableTables] = useState([]);
   const [availableTimes, setAvailableTimes] = useState([]);
   const [reservations, setReservations] = useState([]);
+  const [openingDays, setOpeningDays] = useState([]);
 
   useEffect(() => {
     fetchTables();
@@ -51,26 +53,46 @@ function ReservePage() {
     }
   };
 
+
   const fetchOpeningHours = async () => {
     try {
       const hours = await getOpeningHours();
-      // Handle opening hours logic here
+      // Convert the response into an array of open days
+      const openDays = hours
+        .filter(hour => !hour.isClosed) // Filter out closed days
+        .map(hour => {
+          switch (hour.dayOfWeek) {
+            case "Sunday": return 0;
+            case "Monday": return 1;
+            case "Tuesday": return 2;
+            case "Wednesday": return 3;
+            case "Thursday": return 4;
+            case "Friday": return 5;
+            case "Saturday": return 6;
+            default: return null;
+          }
+        })
+        .filter(day => day !== null);
+      
+      setOpeningDays(openDays); // Store the array of open days
     } catch (error) {
       console.error("Error fetching opening hours:", error);
     }
   };
 
+
   const fetchReservations = async () => {
     try {
       const fetchedReservations = await getReservationsByDate(reservationData.selectedDate);
       setReservations(fetchedReservations);
-      updateAvailableTimes();
+      updateAvailableTimes(fetchedReservations);
     } catch (error) {
       console.error("Error fetching reservations:", error);
     }
   };
 
-  const updateAvailableTimes = () => {
+  // Update available time slots based on selected meal and existing reservations
+  const updateAvailableTimes = (reservationsForDate) => {
     const { selectedMeal } = reservationData;
     let startHour, endHour;
 
@@ -100,8 +122,27 @@ function ReservePage() {
       }
     }
 
-    const bookedTimes = reservations.map((reservation) => reservation.time);
-    const filteredTimes = timeSlots.filter((time) => !bookedTimes.includes(time) && time <= '21:30');
+    // Get booked time slots from the reservations response
+    const bookedTimeSlots = reservationsForDate.flatMap((reservation) => {
+      return reservation.timeSlots.map((slot) => ({
+        startTime: slot.startTime.slice(11, 16), // Extract time from datetime
+        endTime: slot.endTime.slice(11, 16),
+      }));
+    });
+
+    // Filter time slots to exclude those overlapping with booked slots
+    const filteredTimes = timeSlots.filter((time) => {
+      // Check if the time overlaps with any booked slots
+      return !bookedTimeSlots.some((slot) => {
+        const [startHour, startMinute] = slot.startTime.split(':').map(Number);
+        const [endHour, endMinute] = slot.endTime.split(':').map(Number);
+        const start = startHour * 60 + startMinute;
+        const end = endHour * 60 + endMinute;
+        const selectedTime = parseInt(time.split(':')[0]) * 60 + parseInt(time.split(':')[1]);
+
+        return selectedTime >= start && selectedTime < end;
+      });
+    });
 
     setAvailableTimes(filteredTimes);
   };
@@ -129,28 +170,22 @@ function ReservePage() {
     }));
   };
 
-  const handleSubmit = async (personalDetails) => {
+  const handleSubmit = async ({ personalDetails, isExistingUser, customerId }) => {
     try {
-      let customerId = personalDetails.customerId;
-
-      if (!personalDetails.isExistingUser) {
-        const newUser = await createUser(personalDetails);
-        customerId = newUser.customerId;
-      }
-
-      const reservationData = {
-        customerId: customerId,
+      const reservationDataToSubmit = {
+        customerId,
         reservationDate: `${reservationData.selectedDate}T${reservationData.selectedTime}:00.000Z`,
         numberOfGuests: reservationData.numberOfPersons,
-        tableNumbers: reservationData.selectedTables.map(table => table.number),
+        tableNumbers: reservationData.selectedTables,
         specialRequests: reservationData.specialRequests
       };
 
-      await postReservation(reservationData);
-      // Handle successful reservation (e.g., show confirmation, reset form)
+      const response = await postReservation(reservationDataToSubmit);
+      console.log('Reservation created successfully:', response);
+      // Handle success (e.g., show confirmation, reset form)
     } catch (error) {
       console.error("Error posting reservation:", error);
-      // Handle error (e.g., show error message to user)
+      // Handle error (e.g., show error message)
     }
   };
 
@@ -173,6 +208,7 @@ function ReservePage() {
           selectedDate={reservationData.selectedDate}
           onDateChange={(date) => handleInputChange('selectedDate', date)}
           onNext={handleNextStep}
+          openingDays={openingDays}
         />
       )}
 

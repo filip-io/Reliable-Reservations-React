@@ -1,75 +1,96 @@
-import React, { useState, useEffect } from 'react';
-import PropTypes from 'prop-types';
-import { checkUserExists } from '../../../services/customerService';
+import React, { useState } from 'react';
+import { checkUserExists, createUser } from '../../../services/customerService';
 
 const PersonalDetailsStep = ({ personalDetails, onChange, onSubmit }) => {
   const [isExistingUser, setIsExistingUser] = useState(false);
   const [customerId, setCustomerId] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    const checkUser = async () => {
-      if (personalDetails.email) {
-        try {
-          const { exists, customerId } = await checkUserExists(personalDetails.email);
-          setIsExistingUser(exists);
-          if (exists) {
-            setCustomerId(customerId);
-            // Here you could also fetch and set other user details if needed
-          }
-        } catch (error) {
-          console.error('Error checking user:', error);
-        }
+  const handleEmailSubmit = async () => {
+    setLoading(true);
+    try {
+      const user = await checkUserExists(personalDetails.email);
+      if (user) {
+        setIsExistingUser(true);
+        setCustomerId(user.customerId);
+        onChange('firstName', user.firstName);
+        onChange('lastName', user.lastName);
+        onChange('phoneNumber', user.phoneNumber);
+        // Automatically populate form fields with user data
+      } else {
+        setIsExistingUser(false);
+        setCustomerId(null); // New user, needs to be created
       }
-    };
+    } catch (error) {
+      console.error('Error checking user existence:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    checkUser();
-  }, [personalDetails.email]);
+  const handleSubmit = async () => {
+    let finalCustomerId = customerId;
 
-  const handleSubmit = () => {
-    onSubmit({ ...personalDetails, isExistingUser, customerId });
+    // If it's a new user, create them first
+    if (!isExistingUser) {
+      try {
+        const newUser = await createUser(personalDetails);
+        finalCustomerId = newUser.customerId;
+      } catch (error) {
+        console.error('Error creating new user:', error);
+        return;
+      }
+    }
+
+    // Pass customerId (existing or newly created) to the reservation submission
+    onSubmit({ personalDetails, isExistingUser, customerId: finalCustomerId });
   };
 
   return (
-    <div className="personal-details-step">
-      <h2>Your Personal Details</h2>
-      <input
-        type="text"
-        placeholder="First Name"
-        value={personalDetails.firstName}
-        onChange={(e) => onChange('firstName', e.target.value)}
-      />
-      <input
-        type="text"
-        placeholder="Last Name"
-        value={personalDetails.lastName}
-        onChange={(e) => onChange('lastName', e.target.value)}
-      />
-      <input
-        type="text"
-        placeholder="Phone Number"
-        value={personalDetails.phoneNumber}
-        onChange={(e) => onChange('phoneNumber', e.target.value)}
-      />
+    <div>
+      <h3>Personal Details</h3>
       <input
         type="email"
-        placeholder="Email"
         value={personalDetails.email}
         onChange={(e) => onChange('email', e.target.value)}
+        placeholder="Email"
       />
-      <button onClick={handleSubmit}>Confirm Reservation</button>
+      <button type="button" onClick={handleEmailSubmit}>
+        {loading ? 'Checking...' : 'Check Email'}
+      </button>
+
+      {isExistingUser && (
+        <p>User found! Personal details pre-filled below.</p>
+      )}
+
+      {!isExistingUser && (
+        <>
+          <input
+            type="text"
+            value={personalDetails.firstName}
+            onChange={(e) => onChange('firstName', e.target.value)}
+            placeholder="First Name"
+          />
+          <input
+            type="text"
+            value={personalDetails.lastName}
+            onChange={(e) => onChange('lastName', e.target.value)}
+            placeholder="Last Name"
+          />
+          <input
+            type="tel"
+            value={personalDetails.phoneNumber}
+            onChange={(e) => onChange('phoneNumber', e.target.value)}
+            placeholder="Phone Number"
+          />
+        </>
+      )}
+
+      <button type="button" onClick={handleSubmit}>
+        Submit Reservation
+      </button>
     </div>
   );
-};
-
-PersonalDetailsStep.propTypes = {
-  personalDetails: PropTypes.shape({
-    firstName: PropTypes.string.isRequired,
-    lastName: PropTypes.string.isRequired,
-    phoneNumber: PropTypes.string.isRequired,
-    email: PropTypes.string.isRequired,
-  }).isRequired,
-  onChange: PropTypes.func.isRequired,
-  onSubmit: PropTypes.func.isRequired,
 };
 
 export default PersonalDetailsStep;
