@@ -73,14 +73,14 @@ function ReservePage() {
           }
         })
         .filter(day => day !== null);
-      
+
       setOpeningDays(openDays); // Store the array of open days
     } catch (error) {
       console.error("Error fetching opening hours:", error);
     }
   };
 
-  
+
   const fetchReservations = async () => {
     try {
       const fetchedReservations = await getReservationsByDate(reservationData.selectedDate);
@@ -153,6 +153,12 @@ function ReservePage() {
     }
   };
 
+  const handlePreviousStep = () => {
+    if (currentStep > 1) {
+      setCurrentStep((prevStep) => prevStep - 1);
+    }
+  };
+
   const handleInputChange = (field, value) => {
     setReservationData((prevData) => ({
       ...prevData,
@@ -190,34 +196,43 @@ function ReservePage() {
   };
 
   return (
+
     <div className="reserve-page">
       <h1>Reserve a Table</h1>
       <p>Book a table at our restaurant and enjoy an amazing dining experience.</p>
 
+      {currentStep > 1 && (
+        <button onClick={handlePreviousStep} className="back-button">
+          Back
+        </button>
+      )}
+      
       {currentStep === 1 && (
-        <NumberOfPersonsStep
-          onSelect={(number) => {
-            handleInputChange('numberOfPersons', number);
+        <MealSelectionStep
+          onSelect={(meal) => {
+            handleInputChange('selectedMeal', meal);
             handleNextStep();
           }}
         />
       )}
 
       {currentStep === 2 && (
+
+        <NumberOfPersonsStep
+          onSelect={(number) => {
+            handleInputChange('numberOfPersons', number);
+            handleNextStep();
+          }}
+        />
+
+      )}
+
+      {currentStep === 3 && (
         <DateSelectionStep
           selectedDate={reservationData.selectedDate}
           onDateChange={(date) => handleInputChange('selectedDate', date)}
           onNext={handleNextStep}
           openingDays={openingDays}
-        />
-      )}
-
-      {currentStep === 3 && (
-        <MealSelectionStep
-          onSelect={(meal) => {
-            handleInputChange('selectedMeal', meal);
-            handleNextStep();
-          }}
         />
       )}
 
