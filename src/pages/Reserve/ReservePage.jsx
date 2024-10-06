@@ -3,6 +3,8 @@ import { getReservationsByDate, postReservation } from '../../services/reservati
 import { getTables } from '../../services/tableService';
 import { getOpeningHours } from '../../services/openingHoursService';
 import { createUser } from '../../services/customerService';
+import ReservationProgress from './components/ReservationProgress';
+import InitialStep from './steps/InitialStep';
 import NumberOfPersonsStep from './steps/NumberOfPersonsStep';
 import DateSelectionStep from './steps/DateSelectionStep';
 import MealSelectionStep from './steps/MealSelectionStep';
@@ -10,9 +12,11 @@ import TimeSelectionStep from './steps/TimeSelectionStep';
 import TableSelectionStep from './steps/TableSelectionStep';
 import SpecialRequestsStep from './steps/SpecialRequestsStep';
 import PersonalDetailsStep from './steps/PersonalDetailsStep';
+import ConfirmationStep from './steps/ConfirmationStep';
 
 function ReservePage() {
-  const [currentStep, setCurrentStep] = useState(1);
+  const [currentStep, setCurrentStep] = useState(0);
+  const totalSteps = 9;
   const [reservationData, setReservationData] = useState({
     numberOfPersons: 0,
     selectedDate: '',
@@ -34,9 +38,11 @@ function ReservePage() {
   const [openingDays, setOpeningDays] = useState([]);
 
   useEffect(() => {
-    fetchTables();
-    fetchOpeningHours();
-  }, []);
+    if (currentStep > 0) {
+      fetchTables();
+      fetchOpeningHours();
+    }
+  }, [currentStep]);
 
   useEffect(() => {
     if (reservationData.selectedDate && reservationData.selectedMeal) {
@@ -195,18 +201,37 @@ function ReservePage() {
     }
   };
 
-  return (
+  const handleBegin = () => {
+    setCurrentStep(1);
+  };
 
+  const handleEdit = () => {
+    setCurrentStep(1); // Go back to the first step of the reservation process
+  };
+
+
+  return (
     <div className="reserve-page">
       <h1>Reserve a Table</h1>
-      <p>Book a table at our restaurant and enjoy an amazing dining experience.</p>
+
+      {currentStep > 0 && (
+        <ReservationProgress
+          currentStep={currentStep}
+          totalSteps={totalSteps}
+          reservationData={reservationData}
+        />
+      )}
 
       {currentStep > 1 && (
         <button onClick={handlePreviousStep} className="back-button">
           Back
         </button>
       )}
-      
+
+      {currentStep === 0 && (
+        <InitialStep onBegin={handleBegin} />
+      )}
+
       {currentStep === 1 && (
         <MealSelectionStep
           onSelect={(meal) => {
@@ -217,14 +242,12 @@ function ReservePage() {
       )}
 
       {currentStep === 2 && (
-
         <NumberOfPersonsStep
           onSelect={(number) => {
             handleInputChange('numberOfPersons', number);
             handleNextStep();
           }}
         />
-
       )}
 
       {currentStep === 3 && (
@@ -267,7 +290,15 @@ function ReservePage() {
         <PersonalDetailsStep
           personalDetails={reservationData.personalDetails}
           onChange={handlePersonalDetailsChange}
-          onSubmit={handleSubmit}
+          onNext={handleNextStep}
+        />
+      )}
+
+      {currentStep === 8 && (
+        <ConfirmationStep
+          reservationData={reservationData}
+          onConfirm={handleSubmit}
+          onEdit={handleEdit}
         />
       )}
     </div>
