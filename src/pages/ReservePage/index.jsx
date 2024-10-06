@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { getReservationsByDate, postReservation } from '../services/reservationService';
-import { getTables } from '../services/tableService';
-import { getOpeningHours } from '../services/openingHoursService';
-import { createUser } from '../services/customerService';
-import NumberOfPersonsStep from '../components/reservation/steps/NumberOfPersonsStep';
-import DateSelectionStep from '../components/reservation/steps/DateSelectionStep';
-import MealSelectionStep from '../components/reservation/steps/MealSelectionStep';
-import TimeSelectionStep from '../components/reservation/steps/TimeSelectionStep';
-import TableSelectionStep from '../components/reservation/steps/TableSelectionStep';
-import SpecialRequestsStep from '../components/reservation/steps/SpecialRequestsStep';
-import PersonalDetailsStep from '../components/reservation/steps/PersonalDetailsStep';
+import { getReservationsByDate, postReservation } from '../../services/reservationService';
+import { getTables } from '../../services/tableService';
+import { getOpeningHours } from '../../services/openingHoursService';
+import { createUser } from '../../services/customerService';
+import NumberOfPersonsStep from './steps/NumberOfPersonsStep';
+import DateSelectionStep from './steps/DateSelectionStep';
+import MealSelectionStep from './steps/MealSelectionStep';
+import TimeSelectionStep from './steps/TimeSelectionStep';
+import TableSelectionStep from './steps/TableSelectionStep';
+import SpecialRequestsStep from './steps/SpecialRequestsStep';
+import PersonalDetailsStep from './steps/PersonalDetailsStep';
 
 function ReservePage() {
   const [currentStep, setCurrentStep] = useState(1);
@@ -80,7 +80,7 @@ function ReservePage() {
     }
   };
 
-
+  
   const fetchReservations = async () => {
     try {
       const fetchedReservations = await getReservationsByDate(reservationData.selectedDate);
