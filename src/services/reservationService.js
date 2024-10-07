@@ -2,13 +2,15 @@ import axios from 'axios';
 
 const apiUrl = import.meta.env.VITE_API_BASE_URL;
 
-export async function getReservationsByDate(date) {
+export async function getExistingReservations(date) {
     try {
-        const response = await axios.get(`${apiUrl}/Reservation/date/${date}`);
-        console.log("Reservations fetched successfully: ", response.data);
+        const response = await axios.get(`${apiUrl}/Reservation/existing`, {
+            params: { date: date }
+        });
+        console.log("Existing reservations fetched successfully: ", response.data);
         return response.data;
     } catch (error) {
-        console.error("Error fetching reservations: ", error);
+        console.error("Error fetching existing reservations: ", error);
         throw error;
     }
 }

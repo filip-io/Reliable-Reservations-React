@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { getReservationsByDate, postReservation } from '../../services/reservationService';
+import { getExistingReservations, postReservation } from '../../services/reservationService';
 import { getTables } from '../../services/tableService';
 import { getOpeningHours } from '../../services/openingHoursService';
 import ReservationProgress from './components/ReservationProgress';
-import InitialStep from './steps/InitialStep';
 import NumberOfPersonsStep from './steps/NumberOfPersonsStep';
 import DateSelectionStep from './steps/DateSelectionStep';
 import MealSelectionStep from './steps/MealSelectionStep';
@@ -12,10 +11,13 @@ import TableSelectionStep from './steps/TableSelectionStep';
 import SpecialRequestsStep from './steps/SpecialRequestsStep';
 import PersonalDetailsStep from './steps/PersonalDetailsStep';
 import ConfirmationStep from './steps/ConfirmationStep';
+import ConfirmationMessage from './components/ConfirmationMessage';
+import './ReservePage.css';
 
 function ReservePage() {
-  const [currentStep, setCurrentStep] = useState(0);
-  const totalSteps = 9;
+  const [currentStep, setCurrentStep] = useState(1);
+  const totalSteps = 8;
+  const [tablesForSelectedTime, setTablesForSelectedTime] = useState([]);
   const [reservationData, setReservationData] = useState({
     numberOfPersons: 0,
     selectedDate: '',
@@ -30,14 +32,16 @@ function ReservePage() {
       email: '',
       customerId: null,
     },
+    timeSlotInfo: [],
   });
 
-  console.log('ReservePage rendered', { currentStep, reservationData });
-
+  const [isReservationConfirmed, setIsReservationConfirmed] = useState(false);
+  const [isPageFading, setIsPageFading] = useState(false);
   const [availableTables, setAvailableTables] = useState([]);
   const [availableTimes, setAvailableTimes] = useState([]);
   const [reservations, setReservations] = useState([]);
   const [openingDays, setOpeningDays] = useState([]);
+  const [openingHours, setOpeningHours] = useState([]);
 
   useEffect(() => {
     if (currentStep > 0) {
@@ -47,10 +51,10 @@ function ReservePage() {
   }, [currentStep]);
 
   useEffect(() => {
-    if (reservationData.selectedDate && reservationData.selectedMeal) {
+    if (reservationData.selectedDate && reservationData.selectedMeal && availableTables.length > 0) {
       fetchReservations();
     }
-  }, [reservationData.selectedDate, reservationData.selectedMeal]);
+  }, [reservationData.selectedDate, reservationData.selectedMeal, availableTables]);
 
   const fetchTables = async () => {
     try {
@@ -61,103 +65,159 @@ function ReservePage() {
     }
   };
 
-
   const fetchOpeningHours = async () => {
     try {
       const hours = await getOpeningHours();
-      // Convert the response into an array of open days
+      console.log("Raw opening hours data:", hours);
+  
       const openDays = hours
-        .filter(hour => !hour.isClosed) // Filter out closed days
+        .filter(hour => !hour.isClosed)
         .map(hour => {
-          switch (hour.dayOfWeek) {
-            case "Sunday": return 0;
-            case "Monday": return 1;
-            case "Tuesday": return 2;
-            case "Wednesday": return 3;
-            case "Thursday": return 4;
-            case "Friday": return 5;
-            case "Saturday": return 6;
-            default: return null;
-          }
-        })
-        .filter(day => day !== null);
-
-      setOpeningDays(openDays); // Store the array of open days
+          const [openHour, openMinute] = hour.openTime.split(':').map(Number);
+          const [closeHour, closeMinute] = hour.closeTime.split(':').map(Number);
+          return {
+            dayOfWeek: hour.dayOfWeek,
+            openingHour: openHour,
+            openingMinute: openMinute,
+            closingHour: closeHour,
+            closingMinute: closeMinute
+          };
+        });
+  
+      console.log("Parsed opening hours:", openDays);
+      setOpeningHours(openDays);
+  
+      const numericDays = openDays.map(day => {
+        switch (day.dayOfWeek) {
+          case "Sunday": return 0;
+          case "Monday": return 1;
+          case "Tuesday": return 2;
+          case "Wednesday": return 3;
+          case "Thursday": return 4;
+          case "Friday": return 5;
+          case "Saturday": return 6;
+          default: return null;
+        }
+      }).filter(day => day !== null);
+  
+      console.log("Numeric days:", numericDays);
+      setOpeningDays(numericDays);
+  
     } catch (error) {
       console.error("Error fetching opening hours:", error);
     }
   };
 
+  const getSelectedDayOpeningHours = () => {
+    if (!reservationData.selectedDate) return null;
+    const selectedDay = new Date(reservationData.selectedDate).toLocaleString('en-us', { weekday: 'long' });
+    return openingHours.find(day => day.dayOfWeek === selectedDay) || null;
+  };
 
   const fetchReservations = async () => {
     try {
-      const fetchedReservations = await getReservationsByDate(reservationData.selectedDate);
-      setReservations(fetchedReservations);
-      updateAvailableTimes(fetchedReservations);
+      const existingReservations = await getExistingReservations(reservationData.selectedDate);
+      setReservations(existingReservations);
+      updateAvailableTimes(existingReservations);
     } catch (error) {
-      console.error("Error fetching reservations:", error);
+      console.error("Error fetching existing reservations:", error);
     }
   };
 
-  // Update available time slots based on selected meal and existing reservations
-  const updateAvailableTimes = (reservationsForDate) => {
-    const { selectedMeal } = reservationData;
+  const updateAvailableTimes = (existingReservations) => {
+    console.log("Starting updateAvailableTimes");
+    const { selectedMeal, selectedDate, numberOfPersons } = reservationData;
+    console.log("Selected meal:", selectedMeal);
+    console.log("Selected date:", selectedDate);
+    console.log("Number of persons:", numberOfPersons);
+  
+    const selectedDay = new Date(selectedDate).toLocaleString('en-us', {weekday:'long'});
+    const selectedDayHours = openingHours.find(day => day.dayOfWeek === selectedDay);
+    console.log("Selected day hours:", selectedDayHours);
+  
+    if (!selectedDayHours) {
+      console.error("No opening hours found for selected date");
+      return;
+    }
+  
     let startHour, endHour;
-
+  
     switch (selectedMeal) {
       case 'Brunch':
-        startHour = 10;
-        endHour = 12;
+        startHour = Math.max(selectedDayHours.openingHour, 10);
+        endHour = Math.min(selectedDayHours.closingHour, 12);
         break;
       case 'Lunch':
-        startHour = 12;
-        endHour = 14;
+        startHour = Math.max(selectedDayHours.openingHour, 12);
+        endHour = Math.min(selectedDayHours.closingHour, 14);
         break;
       case 'Dinner':
-        startHour = 15;
-        endHour = 23;
+        startHour = Math.max(selectedDayHours.openingHour, 15);
+        endHour = selectedDayHours.closingHour;
         break;
       default:
-        console.log("Invalid meal selection:", selectedMeal);
+        console.error("Invalid meal selection:", selectedMeal);
         return;
     }
-
-    const timeSlots = [];
-    for (let hour = startHour; hour < endHour; hour++) {
-      for (let minute = 0; minute < 60; minute += 30) {
-        const timeSlot = `${hour.toString().padStart(2, '0')}:${minute === 0 ? '00' : '30'}`;
-        timeSlots.push(timeSlot);
-      }
-    }
-
-    // Get booked time slots from the reservations response
-    const bookedTimeSlots = reservationsForDate.flatMap((reservation) => {
-      return reservation.timeSlots.map((slot) => ({
-        startTime: slot.startTime.slice(11, 16), // Extract time from datetime
-        endTime: slot.endTime.slice(11, 16),
-      }));
-    });
-
-    // Filter time slots to exclude those overlapping with booked slots
-    const filteredTimes = timeSlots.filter((time) => {
-      // Check if the time overlaps with any booked slots
-      return !bookedTimeSlots.some((slot) => {
-        const [startHour, startMinute] = slot.startTime.split(':').map(Number);
-        const [endHour, endMinute] = slot.endTime.split(':').map(Number);
-        const start = startHour * 60 + startMinute;
-        const end = endHour * 60 + endMinute;
-        const selectedTime = parseInt(time.split(':')[0]) * 60 + parseInt(time.split(':')[1]);
-
-        return selectedTime >= start && selectedTime < end;
+  
+    console.log("Start hour:", startHour);
+    console.log("End hour:", endHour);
+  
+    const getAvailableTables = (slotStart, slotEnd) => {
+      const reservedTableNumbers = new Set();
+      existingReservations.forEach(reservation => {
+        const resStart = new Date(reservation.startTime);
+        const resEnd = new Date(reservation.endTime);
+        if (slotStart < resEnd && slotEnd > resStart) {
+          reservation.tableNumbers.forEach(tableNumber => reservedTableNumbers.add(tableNumber));
+        }
       });
+      return availableTables.filter(table => !reservedTableNumbers.has(table.tableNumber));
+    };
+  
+    const generateTimeSlots = (start, end) => {
+      const slots = [];
+      const closingTime = selectedDayHours.closingHour * 60 + selectedDayHours.closingMinute;
+      for (let hour = start; hour < end; hour++) {
+        for (let minute = 0; minute < 60; minute += 15) {
+          const slotTime = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+          const slotEndMinutes = hour * 60 + minute + 90; // 90 minutes later
+          if (slotEndMinutes <= closingTime) {
+            slots.push(slotTime);
+          }
+        }
+      }
+      return slots;
+    };
+  
+    const timeSlots = generateTimeSlots(startHour, endHour);
+    console.log("Generated time slots:", timeSlots);
+  
+    const selectedDateObj = new Date(selectedDate);
+  
+    const timeSlotInfo = timeSlots.map(time => {
+      const [hour, minute] = time.split(':').map(Number);
+      const slotStart = new Date(selectedDateObj);
+      slotStart.setHours(hour, minute, 0, 0);
+      const slotEnd = new Date(slotStart.getTime() + 90 * 60000); // 90 minutes later
+      const availableTables = getAvailableTables(slotStart, slotEnd);
+      return { time, availableTables };
     });
+  
+    console.log("Time slot info:", timeSlotInfo);
+    setAvailableTimes(timeSlotInfo);
+    setReservationData(prevData => ({ ...prevData, timeSlotInfo }));
+  };
 
-    setAvailableTimes(filteredTimes);
+  const handleTimeSelection = (time) => {
+    const selectedTimeSlot = reservationData.timeSlotInfo.find(slot => slot.time === time);
+    setTablesForSelectedTime(selectedTimeSlot.availableTables);
+    handleInputChange('selectedTime', time);
+    handleNextStep();
   };
 
   const handleNextStep = () => {
-    console.log('handleNextStep called', currentStep);
-    if (currentStep < totalSteps - 1) {
+    if (currentStep < totalSteps) {
       setCurrentStep((prevStep) => prevStep + 1);
     }
   };
@@ -169,14 +229,19 @@ function ReservePage() {
   };
 
   const handleInputChange = (field, value) => {
-    setReservationData((prevData) => ({
-      ...prevData,
-      [field]: value,
-    }));
+    setReservationData((prevData) => {
+      const newData = { ...prevData, [field]: value };
+
+      // Reset selected tables if number of persons changes
+      if (field === 'numberOfPersons') {
+        newData.selectedTables = [];
+      }
+
+      return newData;
+    });
   };
 
   const handlePersonalDetailsChange = (field, value) => {
-    console.log('handlePersonalDetailsChange called', { field, value });
     setReservationData((prevData) => ({
       ...prevData,
       personalDetails: {
@@ -198,19 +263,17 @@ function ReservePage() {
       console.log('Submitting reservation data:', reservationDataToSubmit);
       const response = await postReservation(reservationDataToSubmit);
       console.log('Reservation created successfully:', response);
-      // Handle success (e.g., show confirmation, reset form)
+      setIsPageFading(true);
+      setTimeout(() => {
+        setIsReservationConfirmed(true);
+      }, 300);
     } catch (error) {
       console.error("Error posting reservation:", error);
       // Handle error (e.g., show error message)
     }
   };
 
-  const handleBegin = () => {
-    setCurrentStep(1);
-  };
-
   const handleEdit = () => {
-    // Clear personal details when editing
     setReservationData(prevData => ({
       ...prevData,
       personalDetails: {
@@ -223,27 +286,51 @@ function ReservePage() {
     setCurrentStep(1);
   };
 
+  const handleNewReservation = () => {
+    setReservationData({
+      numberOfPersons: 0,
+      selectedDate: '',
+      selectedTime: '',
+      selectedMeal: '',
+      selectedTables: [],
+      specialRequests: '',
+      personalDetails: {
+        firstName: '',
+        lastName: '',
+        phoneNumber: '',
+        email: '',
+        customerId: null,
+      },
+      timeSlotInfo: [],
+    });
+    setCurrentStep(1);
+    setIsReservationConfirmed(false);
+    setIsPageFading(false);
+  };
+
+  if (isReservationConfirmed) {
+    return (
+      <ConfirmationMessage
+        reservationData={reservationData}
+        onNewReservation={handleNewReservation}
+      />
+    );
+  }
 
   return (
-    <div className="reserve-page">
+    <div className={`reserve-page ${isPageFading ? 'fading' : ''}`}>
       <h1>Reserve a Table</h1>
 
-      {currentStep > 0 && (
-        <ReservationProgress
-          currentStep={currentStep}
-          totalSteps={totalSteps}
-          reservationData={reservationData}
-        />
-      )}
+      <ReservationProgress
+        currentStep={currentStep}
+        totalSteps={totalSteps}
+        reservationData={reservationData}
+      />
 
       {currentStep > 1 && (
         <button onClick={handlePreviousStep} className="back-button">
           Back
         </button>
-      )}
-
-      {currentStep === 0 && (
-        <InitialStep onBegin={handleBegin} />
       )}
 
       {currentStep === 1 && (
@@ -276,17 +363,17 @@ function ReservePage() {
       {currentStep === 4 && (
         <TimeSelectionStep
           availableTimes={availableTimes}
-          onSelect={(time) => {
-            handleInputChange('selectedTime', time);
-            handleNextStep();
-          }}
+          numberOfPersons={reservationData.numberOfPersons}
+          onSelect={handleTimeSelection}
+          openingHours={getSelectedDayOpeningHours()}
         />
       )}
 
       {currentStep === 5 && (
         <TableSelectionStep
-          availableTables={availableTables}
+          availableTables={tablesForSelectedTime}
           selectedTables={reservationData.selectedTables}
+          numberOfPersons={reservationData.numberOfPersons}
           onSelect={(tables) => handleInputChange('selectedTables', tables)}
           onNext={handleNextStep}
         />

@@ -24,7 +24,7 @@ const ReservationProgress = ({ currentStep, totalSteps, reservationData }) => {
         Step {currentStep} of {totalSteps}: {stepLabels[currentStep - 1]}
       </p>
       <div className="reservation-summary">
-        <h4>Your Reservation So Far:</h4>
+        <h4>Your Reservation:</h4>
         <ul>
           {reservationData.selectedMeal && (
             <li>Meal: {reservationData.selectedMeal}</li>
