@@ -15,12 +15,12 @@ const ConfirmationMessage = ({ reservationData, onNewReservation }) => {
     <div className={`confirmation-message ${isVisible ? 'visible' : ''}`}>
       <div className="confirmation-content">
         <h2>Reservation Confirmed!</h2>
-        <p>Thank you for your reservation. Here are the details:</p>
+        <p>Thank you for your reservation.</p>
         <ul>
           <li>Date: {reservationData.selectedDate}</li>
-          <li>Meal Type: {reservationData.selectedMeal}</li>
+          <li>Meal: {reservationData.selectedMeal}</li>
           <li>Time: {reservationData.selectedTime}</li>
-          <li>Number of Guests: {reservationData.numberOfPersons}</li>
+          <li>Guests: {reservationData.numberOfPersons}</li>
           <li>Table(s): {reservationData.selectedTables.join(', ')}</li>
         </ul>
         <button onClick={onNewReservation}>Make Another Reservation</button>

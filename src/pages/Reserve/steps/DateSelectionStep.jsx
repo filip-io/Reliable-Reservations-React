@@ -1,23 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 const DateSelectionStep = ({ selectedDate, onDateChange, onNext, openingDays }) => {
   const [errorMessage, setErrorMessage] = useState('');
 
-  const today = new Date().toISOString().split('T')[0]; // Today's date in 'YYYY-MM-DD' format
-
   const isDateSelectable = (date) => {
-    const selectedDay = new Date(date).getDay();
-    return openingDays.includes(selectedDay); // Check if the day is one of the restaurant's open days
+    const day = date.getDay();
+    return openingDays.includes(day);
   };
 
-  const handleDateChange = (e) => {
-    const date = e.target.value;
-
-    // Check if the selected date is valid
+  const handleDateChange = (date) => {
     if (isDateSelectable(date)) {
-      onDateChange(date); // Set the selected date in the parent state
-      setErrorMessage(''); // Clear error message if any
+      onDateChange(date.toISOString().split('T')[0]);
+      setErrorMessage('');
     } else {
       setErrorMessage("Sorry, the restaurant is closed on this day.");
     }
@@ -26,10 +23,8 @@ const DateSelectionStep = ({ selectedDate, onDateChange, onNext, openingDays }) 
   const handleNextClick = () => {
     if (!selectedDate) {
       setErrorMessage('Please select a date to proceed.');
-    } else if (!isDateSelectable(selectedDate)) {
-      setErrorMessage('You cannot select a date when the restaurant is closed.');
     } else {
-      onNext(); // Proceed to the next step
+      onNext();
     }
   };
 
@@ -37,16 +32,19 @@ const DateSelectionStep = ({ selectedDate, onDateChange, onNext, openingDays }) 
     <div className="date-selection-step">
       <h2>Select a Reservation Date</h2>
 
-      <input
-        type="date"
-        value={selectedDate}
-        min={today} // Block past dates
+      <DatePicker
+        selected={selectedDate ? new Date(selectedDate) : null}
         onChange={handleDateChange}
+        minDate={new Date()}
+        filterDate={isDateSelectable}
+        dateFormat="yyyy-MM-dd"
+        className="form-control"
+        placeholderText="Select a date"
       />
 
-      {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
+      {errorMessage && <p className="text-danger mt-2">{errorMessage}</p>}
 
-      <button onClick={handleNextClick} disabled={!selectedDate}>
+      <button onClick={handleNextClick} disabled={!selectedDate} className="btn btn-primary mt-3">
         Next
       </button>
     </div>
@@ -57,7 +55,7 @@ DateSelectionStep.propTypes = {
   selectedDate: PropTypes.string.isRequired,
   onDateChange: PropTypes.func.isRequired,
   onNext: PropTypes.func.isRequired,
-  openingDays: PropTypes.arrayOf(PropTypes.number).isRequired, // Array of open days (0 = Sunday, 6 = Saturday)
+  openingDays: PropTypes.arrayOf(PropTypes.number).isRequired,
 };
 
 export default DateSelectionStep;
