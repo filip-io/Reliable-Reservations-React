@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { getReservationsByDate, postReservation } from '../../services/reservationService';
 import { getTables } from '../../services/tableService';
 import { getOpeningHours } from '../../services/openingHoursService';
-import { createUser } from '../../services/customerService';
 import ReservationProgress from './components/ReservationProgress';
 import InitialStep from './steps/InitialStep';
 import NumberOfPersonsStep from './steps/NumberOfPersonsStep';
@@ -29,8 +28,11 @@ function ReservePage() {
       lastName: '',
       phoneNumber: '',
       email: '',
+      customerId: null,
     },
   });
+
+  console.log('ReservePage rendered', { currentStep, reservationData });
 
   const [availableTables, setAvailableTables] = useState([]);
   const [availableTimes, setAvailableTimes] = useState([]);
@@ -154,7 +156,8 @@ function ReservePage() {
   };
 
   const handleNextStep = () => {
-    if (currentStep < 7) {
+    console.log('handleNextStep called', currentStep);
+    if (currentStep < totalSteps - 1) {
       setCurrentStep((prevStep) => prevStep + 1);
     }
   };
@@ -173,6 +176,7 @@ function ReservePage() {
   };
 
   const handlePersonalDetailsChange = (field, value) => {
+    console.log('handlePersonalDetailsChange called', { field, value });
     setReservationData((prevData) => ({
       ...prevData,
       personalDetails: {
@@ -182,16 +186,16 @@ function ReservePage() {
     }));
   };
 
-  const handleSubmit = async ({ personalDetails, isExistingUser, customerId }) => {
+  const handleSubmit = async () => {
     try {
       const reservationDataToSubmit = {
-        customerId,
+        customerId: reservationData.personalDetails.customerId,
         reservationDate: `${reservationData.selectedDate}T${reservationData.selectedTime}:00.000Z`,
         numberOfGuests: reservationData.numberOfPersons,
         tableNumbers: reservationData.selectedTables,
-        specialRequests: reservationData.specialRequests
+        specialRequests: reservationData.specialRequests || 'None'
       };
-
+      console.log('Submitting reservation data:', reservationDataToSubmit);
       const response = await postReservation(reservationDataToSubmit);
       console.log('Reservation created successfully:', response);
       // Handle success (e.g., show confirmation, reset form)
@@ -206,7 +210,17 @@ function ReservePage() {
   };
 
   const handleEdit = () => {
-    setCurrentStep(1); // Go back to the first step of the reservation process
+    // Clear personal details when editing
+    setReservationData(prevData => ({
+      ...prevData,
+      personalDetails: {
+        firstName: '',
+        lastName: '',
+        phoneNumber: '',
+        email: '',
+      },
+    }));
+    setCurrentStep(1);
   };
 
 

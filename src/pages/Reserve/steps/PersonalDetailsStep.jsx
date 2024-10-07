@@ -1,29 +1,34 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { checkUserExists, createUser } from '../../../services/customerService';
+import { checkCustomerExists, createCustomer } from '../../../services/customerService';
 
 const PersonalDetailsStep = ({ personalDetails, onChange, onNext }) => {
   const [isChecking, setIsChecking] = useState(false);
   const [showFullForm, setShowFullForm] = useState(false);
   const [error, setError] = useState(null);
 
+  useEffect(() => {
+    setShowFullForm(false);
+    setError(null);
+  }, [personalDetails.email]);
+
   const handleEmailSubmit = async (e) => {
     e.preventDefault();
     setIsChecking(true);
     setError(null);
     try {
-      const user = await checkUserExists(personalDetails.email);
+      const user = await checkCustomerExists(personalDetails.email);
       if (user) {
-        // User exists, autofill data and move to next step
         onChange('firstName', user.firstName);
         onChange('lastName', user.lastName);
         onChange('phoneNumber', user.phoneNumber);
+        onChange('customerId', user.customerId);
         onNext();
       } else {
-        // User doesn't exist, show full form
         setShowFullForm(true);
       }
     } catch (error) {
+      console.error('Error checking user:', error);
       setError("An error occurred while checking user information. Please try again.");
     } finally {
       setIsChecking(false);
@@ -35,9 +40,11 @@ const PersonalDetailsStep = ({ personalDetails, onChange, onNext }) => {
     setIsChecking(true);
     setError(null);
     try {
-      await createUser(personalDetails);
+      const newCustomer = await createCustomer(personalDetails);
+      onChange('customerId', newCustomer.customerId);
       onNext();
     } catch (error) {
+      console.error('Error creating customer:', error);
       setError("An error occurred while saving your information. Please try again.");
     } finally {
       setIsChecking(false);

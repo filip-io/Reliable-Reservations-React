@@ -1,7 +1,8 @@
 import axios from 'axios';
+
 const apiUrl = import.meta.env.VITE_API_BASE_URL;
 
-export const checkUserExists = async (email) => {
+export const checkCustomerExists = async (email) => {
   try {
     const response = await axios.get(`${apiUrl}/customer/email/${email}`);
     return response.data; // Return user data if found
@@ -14,10 +15,10 @@ export const checkUserExists = async (email) => {
   }
 };
 
-export const createUser = async (userData) => {
+export const createCustomer = async (customerData) => {
   try {
-    const response = await axios.post(`${apiUrl}/customer/create`, userData);
-    return response.data; // Return newly created user data
+    const response = await axios.post(`${apiUrl}/customer/create`, customerData);
+    return response.data; // Return newly created customer data, including ID
   } catch (error) {
     throw error;
   }

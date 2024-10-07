@@ -5,7 +5,7 @@ import 'bootswatch/dist/lux/bootstrap.min.css'
 import './styles/index.css'
 
 createRoot(document.getElementById('root')).render(
-  <StrictMode>
+/*   <StrictMode> */
     <App />
-  </StrictMode>,
+/*   </StrictMode>, */
 )
