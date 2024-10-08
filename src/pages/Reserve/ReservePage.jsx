@@ -24,7 +24,7 @@ function ReservePage() {
     selectedMeal: '',
     selectedTime: '',
     selectedTables: [],
-    specialRequests: 'None',
+    specialRequests: '',
     personalDetails: {
       firstName: '',
       lastName: '',

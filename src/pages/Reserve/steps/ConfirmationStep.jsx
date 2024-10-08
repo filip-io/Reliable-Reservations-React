@@ -10,7 +10,7 @@ const ConfirmationStep = ({ reservationData, onConfirm, onEdit }) => {
         <p><strong>Number of Persons:</strong> {reservationData.numberOfPersons}</p>
         <p><strong>Date:</strong> {reservationData.selectedDate}</p>
         <p><strong>Time:</strong> {reservationData.selectedTime}</p>
-        <p><strong>Selected Tables:</strong> {reservationData.selectedTables.join(', ')}</p>
+        <p><strong>Selected Table nr(s):</strong> {reservationData.selectedTables.join(', ')}</p>
         <p><strong>Special Requests:</strong> {reservationData.specialRequests || 'None'}</p>
         <p><strong>Name:</strong> {reservationData.personalDetails.firstName} {reservationData.personalDetails.lastName}</p>
         <p><strong>Email:</strong> {reservationData.personalDetails.email}</p>

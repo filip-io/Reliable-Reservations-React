@@ -58,8 +58,3 @@ body {
   align-items: center;
   min-height: 100vh;
 }
-
-main {
-  padding-top: 5rem; /* Adjust to account for fixed navbar */
-  padding-bottom: 2rem;
-}

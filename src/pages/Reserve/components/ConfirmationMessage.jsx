@@ -37,7 +37,7 @@ const ConfirmationMessage = ({ reservationData, onNewReservation }) => {
             <span className="detail-value">{reservationData.selectedTables.join(', ')}</span>
           </div>
         </div>
-        <button onClick={onNewReservation} className="new-reservation-button">Make Another Reservation</button>
+        <button onClick={onNewReservation} className="new-reservation-button">Make another reservation</button>
       </div>
     </div>
   );

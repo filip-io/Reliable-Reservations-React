@@ -12,7 +12,7 @@ const MealSelectionStep = ({ onSelect }) => {
           <button
             key={meal}
             onClick={() => onSelect(meal)}
-            className="reserve-page button"
+            className="meal-button"
           >
             {meal}
           </button>

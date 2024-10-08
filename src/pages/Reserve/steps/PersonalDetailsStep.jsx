@@ -6,6 +6,7 @@ const PersonalDetailsStep = ({ personalDetails, onChange, onNext }) => {
   const [isChecking, setIsChecking] = useState(false);
   const [showFullForm, setShowFullForm] = useState(false);
   const [error, setError] = useState(null);
+  const [phoneError, setPhoneError] = useState('');
 
   useEffect(() => {
     setShowFullForm(false);
@@ -37,6 +38,10 @@ const PersonalDetailsStep = ({ personalDetails, onChange, onNext }) => {
 
   const handleFullFormSubmit = async (e) => {
     e.preventDefault();
+    if (phoneError) {
+      setError("Please enter a valid phone number before submitting.");
+      return;
+    }
     setIsChecking(true);
     setError(null);
     try {
@@ -48,6 +53,17 @@ const PersonalDetailsStep = ({ personalDetails, onChange, onNext }) => {
       setError("An error occurred while saving your information. Please try again.");
     } finally {
       setIsChecking(false);
+    }
+  };
+
+  const handlePhoneChange = (e) => {
+    const value = e.target.value.replace(/\D/g, ''); // Remove non-digit characters
+    onChange('phoneNumber', value);
+    
+    if (value.length < 10 || value.length > 15) {
+      setPhoneError('Phone number should be between 10 and 15 digits');
+    } else {
+      setPhoneError('');
     }
   };
 
@@ -98,11 +114,12 @@ const PersonalDetailsStep = ({ personalDetails, onChange, onNext }) => {
               type="tel"
               id="phoneNumber"
               value={personalDetails.phoneNumber}
-              onChange={(e) => onChange('phoneNumber', e.target.value)}
+              onChange={handlePhoneChange}
               required
             />
+            {phoneError && <p className="error-message">{phoneError}</p>}
           </div>
-          <button type="submit" disabled={isChecking}>
+          <button type="submit" disabled={isChecking || phoneError}>
             {isChecking ? 'Saving...' : 'Save and Continue'}
           </button>
         </form>

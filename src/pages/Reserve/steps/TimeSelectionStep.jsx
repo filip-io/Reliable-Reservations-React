@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 const TimeSelectionStep = ({ availableTimes, onSelect }) => {
   return (
     <div className="time-selection-step">
-      <h2>Select a Time</h2>
+      <h2>When would you like to visit?</h2>
       {availableTimes.length > 0 ? (
         <div className="time-slots">
           {availableTimes.map((time) => (

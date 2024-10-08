@@ -1,8 +1,48 @@
+.layout-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    width: 100%;
+    overflow-x: hidden;
+}
+
 .brand-banner {
     background-color: #f3f3f3cf;
+}
+
+.main-content {
+    flex: 1 0 auto;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    margin-top: 5rem;
+    padding: 1rem;
+    width: 100%;
+    max-width: 100vw;
+    overflow-x: hidden;
+}
+
+.footer-brand {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 50px;
+    background-color: #f3f3f3cf;
+    width: 100%;
 }
 
 .no-link-styles {
     text-decoration: none;
     color: inherit; 
+}
+
+@media (max-width: 768px) {
+    .layout-container {
+        max-width: 100vw;
+    }
+
+    .main-content {
+        padding: 0.5rem;
+    }
 }

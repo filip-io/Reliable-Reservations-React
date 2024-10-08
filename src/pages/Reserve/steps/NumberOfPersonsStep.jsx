@@ -5,7 +5,7 @@ const NumberOfPersonsStep = ({ onSelect }) => {
 
   return (
     <div className="number-of-persons-step">
-      <h2>Select Number of Persons</h2>
+      <h2>Select Number of Guests</h2>
       <div className="button-group">
         {personOptions.map((num) => (
           <button

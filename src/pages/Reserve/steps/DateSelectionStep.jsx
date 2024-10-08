@@ -13,7 +13,10 @@ const DateSelectionStep = ({ selectedDate, onDateChange, onNext, openingDays }) 
 
   const handleDateChange = (date) => {
     if (isDateSelectable(date)) {
-      onDateChange(date.toISOString().split('T')[0]);
+      // Adjust the date to the local time zone
+      const adjustedDate = new Date(date.getTime() - (date.getTimezoneOffset() * 60000));
+      const formattedDate = adjustedDate.toISOString().split('T')[0];
+      onDateChange(formattedDate);
       setErrorMessage('');
     } else {
       setErrorMessage("Sorry, the restaurant is closed on this day.");

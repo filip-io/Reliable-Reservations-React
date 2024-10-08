@@ -19,32 +19,67 @@
 .reserve-page .step-info {
   margin-top: 10px;
   font-weight: 400;
+  color: #333;
 }
 
 .reserve-page .reservation-summary {
   display: flex;
   flex-direction: column;
+  align-items: center;
   background-color: #f5f5f5;
   padding: 15px;
   border-radius: 5px;
   margin-top: 20px;
 }
 
-.reserve-page .reservation-summary h1,
-.reserve-page .reservation-summary h2,
-.reserve-page .reservation-summary h3,
 .reserve-page .reservation-summary h4 {
-  color: #1a1a1a;
-  margin-bottom: 1.5rem;
-  font-weight: 300;
-  font-size: 1.5rem;
+  display: block;
+  background: linear-gradient(45deg, #e905e5eb, #0f0f0f);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  margin-bottom: 1rem;
+  font-size: 1.3rem;
+  font-weight: 500;
 }
 
-.reserve-page .reservation-summary ul {
-  list-style-type: none;
-  padding: 0;
+.reserve-page .reservation-details {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  min-width: 300px;
+  max-width: 300px;
 }
 
-.reserve-page .reservation-summary li {
-  margin-bottom: 5px;
+.reserve-page .detail-item {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.reserve-page .detail-item:last-child {
+  border-bottom: none;
+}
+
+.reserve-page .detail-label {
+  font-weight: bold;
+  color: #333;
+}
+
+.reserve-page .detail-value {
+  background: linear-gradient(45deg, #e905e5eb, #0f0f0f);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+@media (max-width: 480px) {
+  .reserve-page .detail-item {
+    flex-direction: column;
+  }
+
+  .reserve-page .detail-value {
+    margin-top: 0.25rem;
+  }
 }

@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 const SpecialRequestsStep = ({ specialRequests, onChange, onNext }) => {
   return (
     <div className="special-requests-step">
-      <h2>Special Requests</h2>
+      <h2>Any Special Requests?</h2>
       <textarea
         value={specialRequests}
         onChange={(e) => onChange(e.target.value)}

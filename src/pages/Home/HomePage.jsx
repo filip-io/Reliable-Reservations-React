@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import logo from '/images/logo.png'
 import './HomePage.css';
 
 function HomePage() {
@@ -14,6 +15,11 @@ function HomePage() {
       <p className="culinary-experience">
         A culinary experience beyond anything you've ever experienced.
       </p>
+      <img className="logo-image"
+        src={logo}
+        alt="Logo"
+        style={{ width: '450px', height: 'auto', margin: '0 10px', marginBottom: '5px' }}
+      />
       <Link to="/reserve" className="reserve-button" role="button">
         Reserve a Table
       </Link>
