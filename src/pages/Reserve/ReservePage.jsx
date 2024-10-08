@@ -133,7 +133,7 @@ function ReservePage() {
 
     const selectedDay = new Date(selectedDate).toLocaleString('en-us', { weekday: 'long' });
     const selectedDayHours = openingHours.find(day => day.dayOfWeek === selectedDay);
-    console.log("Selected day hours:", selectedDayHours);
+    console.table(selectedDayHours);
 
     if (!selectedDayHours) {
       console.error("No opening hours found for selected date");
