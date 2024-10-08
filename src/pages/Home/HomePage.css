@@ -1,0 +1,81 @@
+.home-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 0;
+  }
+
+  .text-center {
+    margin-top: 10rem;
+  }
+  
+  .welcome-text {
+    margin-bottom: 1rem;
+  }
+  
+  .welcome-intro {
+    display: block;
+    margin-bottom: 0.5rem;
+    opacity: 0;
+    animation: fadeIn 1s ease-out forwards;
+  }
+  
+  .restaurant-name {
+    display: block;
+    background: linear-gradient(45deg, #e905e5eb, #0f0f0f);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    opacity: 0;
+    animation: fadeIn 1s ease-out 0.5s forwards;
+  }
+  
+  .culinary-experience {
+    opacity: 0;
+    animation: fadeIn 1s ease-out 1s forwards;
+  }
+  
+.reserve-button {
+    margin-top: 20px;
+    opacity: 0;
+    animation: fadeIn 1s ease-out 1.5s forwards;
+    transition: all 0.5s ease;
+    padding: 10px 20px;
+    background-color: #bf00ffb7;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.reserve-button:hover {
+    background-color: #ff20ff;
+    color: #fff;
+}
+
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .welcome-intro {
+      font-size: 1.2rem;
+    }
+    
+    .restaurant-name {
+      font-size: 2.5rem;
+    }
+    
+    .culinary-experience {
+      font-size: 1rem;
+    }
+  }

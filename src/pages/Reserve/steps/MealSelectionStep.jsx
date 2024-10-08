@@ -1,3 +1,4 @@
+import React from 'react';
 import PropTypes from 'prop-types';
 
 const MealSelectionStep = ({ onSelect }) => {
@@ -5,12 +6,18 @@ const MealSelectionStep = ({ onSelect }) => {
 
   return (
     <div className="meal-selection-step">
-      <h2>Select a Meal</h2>
-      {availableMeals.map((meal) => (
-        <button key={meal} onClick={() => onSelect(meal)}>
-          {meal}
-        </button>
-      ))}
+      <h3>Select a Meal</h3>
+      <div className="button-group">
+        {availableMeals.map((meal) => (
+          <button
+            key={meal}
+            onClick={() => onSelect(meal)}
+            className="reserve-page button"
+          >
+            {meal}
+          </button>
+        ))}
+      </div>
     </div>
   );
 };

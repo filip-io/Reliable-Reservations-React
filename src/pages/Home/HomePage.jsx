@@ -1,22 +1,20 @@
+import React from 'react';
 import { Link } from 'react-router-dom';
+import './HomePage.css';
 
 function HomePage() {
   return (
-    <div className="text-center">
-      <h1 className="display-4">Welcome to Magnificent Restaurant</h1>
-{/*       <p className="lead">
-        Explore our menu and reserve your table for a delightful dining experience.
-      </p>
-      <hr className="my-4" />
-      <p>Discover a variety of starters, main courses, and desserts and pray that a table is available.</p>
-      <a className="btn btn-primary btn-lg" href="/menu" role="button">
-        View Menu
-      </a> */}
-      <p className="lead">
+    <div className="home-page text-center">
+      <h2>
+        <span className="lead welcome-intro">Welcome to</span>
+      </h2>
+      <h1 className="welcome-text">
+        <span className="display-4 restaurant-name">Magnificent Restaurant</span>
+      </h1>
+      <p className="culinary-experience">
         A culinary experience beyond anything you've ever experienced.
       </p>
-      <hr className="my-4" />
-      <Link to="/reserve" className="btn btn-primary btn-lg" role="button">
+      <Link to="/reserve" className="reserve-button" role="button">
         Reserve a Table
       </Link>
     </div>

@@ -6,7 +6,6 @@ const ConfirmationMessage = ({ reservationData, onNewReservation }) => {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    // Trigger the animation after the component mounts
     const timer = setTimeout(() => setIsVisible(true), 50);
     return () => clearTimeout(timer);
   }, []);
@@ -14,16 +13,31 @@ const ConfirmationMessage = ({ reservationData, onNewReservation }) => {
   return (
     <div className={`confirmation-message ${isVisible ? 'visible' : ''}`}>
       <div className="confirmation-content">
-        <h2>Reservation Confirmed!</h2>
-        <p>Thank you for your reservation.</p>
-        <ul>
-          <li>Date: {reservationData.selectedDate}</li>
-          <li>Meal: {reservationData.selectedMeal}</li>
-          <li>Time: {reservationData.selectedTime}</li>
-          <li>Guests: {reservationData.numberOfPersons}</li>
-          <li>Table(s): {reservationData.selectedTables.join(', ')}</li>
-        </ul>
-        <button onClick={onNewReservation}>Make Another Reservation</button>
+        <h2>Reservation Confirmed</h2>
+        <p>Thank you for your reservation!</p>
+        <div className="reservation-details">
+          <div className="detail-item">
+            <span className="detail-label">Date:</span>
+            <span className="detail-value">{reservationData.selectedDate}</span>
+          </div>
+          <div className="detail-item">
+            <span className="detail-label">Meal:</span>
+            <span className="detail-value">{reservationData.selectedMeal}</span>
+          </div>
+          <div className="detail-item">
+            <span className="detail-label">Time:</span>
+            <span className="detail-value">{reservationData.selectedTime}</span>
+          </div>
+          <div className="detail-item">
+            <span className="detail-label">Guests:</span>
+            <span className="detail-value">{reservationData.numberOfPersons}</span>
+          </div>
+          <div className="detail-item">
+            <span className="detail-label">Table(s):</span>
+            <span className="detail-value">{reservationData.selectedTables.join(', ')}</span>
+          </div>
+        </div>
+        <button onClick={onNewReservation} className="new-reservation-button">Make Another Reservation</button>
       </div>
     </div>
   );

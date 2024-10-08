@@ -1,2 +1,8 @@
+.brand-banner {
+    background-color: #f3f3f3cf;
+}
 
-  
+.no-link-styles {
+    text-decoration: none;
+    color: inherit; 
+}

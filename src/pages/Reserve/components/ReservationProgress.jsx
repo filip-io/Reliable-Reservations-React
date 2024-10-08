@@ -1,6 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import './ReservationProgress.css';
 
 const ReservationProgress = ({ currentStep, totalSteps, reservationData }) => {
   const progress = (currentStep / totalSteps) * 100;

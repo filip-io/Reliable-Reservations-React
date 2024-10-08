@@ -11,10 +11,19 @@
   opacity: 0;
 }
 
-h1, h2 {
+.reserve-page h1, h2, h3, h4 {
   color: #1a1a1a;
   margin-bottom: 1.5rem;
+  font-weight: 300 !important;
 }
+
+.reserve-page h1 {
+  color: #1a1a1a;
+  margin-bottom: 1.5rem;
+  font-weight: 300;
+  font-size: 2.5rem;
+}
+
 
 /* Step components */
 .meal-selection-step,
@@ -32,35 +41,73 @@ h1, h2 {
   box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
 }
 
+/* Button groups */
+.button-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+}
+
 /* Buttons */
-button {
-  background-color: #1a1a1a;
-  color: #ffffff;
+.reserve-page button {
+  margin-top: 20px;
+  transition: all 0.5s ease;
+  padding: 10px 20px;
+  background-color: #464646da;
+  color: #fff;
   border: none;
-  padding: 0.75rem 1.5rem;
-  margin: 0.5rem;
-  border-radius: 0.25rem;
+  border-radius: 5px;
   cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.1s ease;
+  font-size: 1rem;
 }
 
-button:hover {
-  background-color: #4e4e4e;
-
+.reserve-page button:hover {
+  background-color: hsla(332, 91%, 40%, 0.87);
+  color: #fff;
 }
 
-button:disabled {
+.reserve-page button:disabled {
   background-color: #cccccc;
   cursor: not-allowed;
-  transform: none;
 }
 
-.back-button {
-  background-color: #6c757d;
+/* Meal selection */
+
+.meal-selection-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 2rem;
 }
 
-.back-button:hover {
-  background-color: #5a6268;
+.button-group {
+  display: flex;
+  gap: 1rem;
+}
+
+.meal-button {
+  margin-top: 20px;
+  transition: all 0.5s ease;
+  padding: 10px 20px;
+  background-color: #bf00ffb7;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.meal-button:hover {
+  background-color: #ff20ff;
+  color: #fff;
+}
+
+
+/* Date Selection */
+
+.custom-calendar {
+  font-family: inherit;
 }
 
 /* Table selection */
@@ -85,7 +132,13 @@ button:disabled {
 }
 
 .table-button.selected {
-  background-color: #1a1a1a;
+  background-color: hsla(332, 100%, 49%, 0.87);
+  color: #ffffff;
+  border-color: #1a1a1a;
+}
+
+.table-button.selected:hover {
+  background-color: hsla(332, 100%, 49%, 0.87);
   color: #ffffff;
   border-color: #1a1a1a;
 }
@@ -107,7 +160,7 @@ button:disabled {
 }
 
 .time-slot:hover:not(.disabled) {
-  background-color: #f8f9fa;
+  background-color: hsla(332, 91%, 40%, 0.87);
 }
 
 .time-slot.disabled {
@@ -141,14 +194,25 @@ textarea {
   resize: vertical;
 }
 
+
 /* Responsive design */
 @media (max-width: 768px) {
   .reserve-page {
     padding: 1rem;
   }
 
+  .button-group {
+    flex-direction: column;
+  }
+
+  .meal-button,
+  .time-slot,
+  .table-button {
+    width: 100%;
+  }
+
   .table-grid,
   .time-slots {
-    grid-template-columns: repeat(auto-fill, minmax(100%, 1fr));
+    grid-template-columns: 1fr;
   }
 }

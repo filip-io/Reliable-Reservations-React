@@ -29,6 +29,7 @@ const DateSelectionStep = ({ selectedDate, onDateChange, onNext, openingDays }) 
   };
 
   return (
+    <>
     <div className="date-selection-step">
       <h2>Select a Reservation Date</h2>
 
@@ -37,17 +38,21 @@ const DateSelectionStep = ({ selectedDate, onDateChange, onNext, openingDays }) 
         onChange={handleDateChange}
         minDate={new Date()}
         filterDate={isDateSelectable}
-        dateFormat="yyyy-MM-dd"
-        className="form-control"
-        placeholderText="Select a date"
+        inline
+        monthsShown={2}
+        calendarClassName="custom-calendar"
       />
 
       {errorMessage && <p className="text-danger mt-2">{errorMessage}</p>}
 
-      <button onClick={handleNextClick} disabled={!selectedDate} className="btn btn-primary mt-3">
+    </div>
+    <div>
+      <button onClick={handleNextClick} disabled={!selectedDate} className="btn btn-primary mt-1">
         Next
       </button>
     </div>
+    
+    </>
   );
 };
 

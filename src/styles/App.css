@@ -1,7 +1,8 @@
 #root {
-  max-width: 1280px;
+  min-width: 100vw;
+  max-width: 100vw;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 0 auto;
   text-align: center;
 }
 
@@ -51,16 +52,14 @@ body {
 }
 
 .page-container {
-  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 100vh;
 }
 
 main {
   padding-top: 5rem; /* Adjust to account for fixed navbar */
   padding-bottom: 2rem;
 }
-
-footer {
-  background-color: #f8f9fa; /* Light footer color */
-  border-top: 1px solid #e7e7e7;
-}
-

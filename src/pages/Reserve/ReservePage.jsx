@@ -17,7 +17,7 @@ import './ReservePage.css';
 function ReservePage() {
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 8;
-  const [tablesForSelectedTime, setTablesForSelectedTime] = useState([]);
+  const [availableTablesForSelectedTime, setAvailableTablesForSelectedTime] = useState([]);
   const [reservationData, setReservationData] = useState({
     numberOfPersons: 0,
     selectedDate: '',
@@ -69,7 +69,7 @@ function ReservePage() {
     try {
       const hours = await getOpeningHours();
       console.log("Raw opening hours data:", hours);
-  
+
       const openDays = hours
         .filter(hour => !hour.isClosed)
         .map(hour => {
@@ -83,10 +83,10 @@ function ReservePage() {
             closingMinute: closeMinute
           };
         });
-  
+
       console.log("Parsed opening hours:", openDays);
       setOpeningHours(openDays);
-  
+
       const numericDays = openDays.map(day => {
         switch (day.dayOfWeek) {
           case "Sunday": return 0;
@@ -99,10 +99,10 @@ function ReservePage() {
           default: return null;
         }
       }).filter(day => day !== null);
-  
+
       console.log("Numeric days:", numericDays);
       setOpeningDays(numericDays);
-  
+
     } catch (error) {
       console.error("Error fetching opening hours:", error);
     }
@@ -130,18 +130,18 @@ function ReservePage() {
     console.log("Selected meal:", selectedMeal);
     console.log("Selected date:", selectedDate);
     console.log("Number of persons:", numberOfPersons);
-  
-    const selectedDay = new Date(selectedDate).toLocaleString('en-us', {weekday:'long'});
+
+    const selectedDay = new Date(selectedDate).toLocaleString('en-us', { weekday: 'long' });
     const selectedDayHours = openingHours.find(day => day.dayOfWeek === selectedDay);
     console.log("Selected day hours:", selectedDayHours);
-  
+
     if (!selectedDayHours) {
       console.error("No opening hours found for selected date");
       return;
     }
-  
+
     let startHour, endHour;
-  
+
     switch (selectedMeal) {
       case 'Brunch':
         startHour = Math.max(selectedDayHours.openingHour, 10);
@@ -159,22 +159,10 @@ function ReservePage() {
         console.error("Invalid meal selection:", selectedMeal);
         return;
     }
-  
+
     console.log("Start hour:", startHour);
     console.log("End hour:", endHour);
-  
-    const getAvailableTables = (slotStart, slotEnd) => {
-      const reservedTableNumbers = new Set();
-      existingReservations.forEach(reservation => {
-        const resStart = new Date(reservation.startTime);
-        const resEnd = new Date(reservation.endTime);
-        if (slotStart < resEnd && slotEnd > resStart) {
-          reservation.tableNumbers.forEach(tableNumber => reservedTableNumbers.add(tableNumber));
-        }
-      });
-      return availableTables.filter(table => !reservedTableNumbers.has(table.tableNumber));
-    };
-  
+
     const generateTimeSlots = (start, end) => {
       const slots = [];
       const closingTime = selectedDayHours.closingHour * 60 + selectedDayHours.closingMinute;
@@ -189,31 +177,54 @@ function ReservePage() {
       }
       return slots;
     };
-  
+
     const timeSlots = generateTimeSlots(startHour, endHour);
     console.log("Generated time slots:", timeSlots);
-  
+
     const selectedDateObj = new Date(selectedDate);
-  
-    const timeSlotInfo = timeSlots.map(time => {
+
+    const availableTimeSlots = timeSlots.filter(time => {
       const [hour, minute] = time.split(':').map(Number);
       const slotStart = new Date(selectedDateObj);
       slotStart.setHours(hour, minute, 0, 0);
       const slotEnd = new Date(slotStart.getTime() + 90 * 60000); // 90 minutes later
       const availableTables = getAvailableTables(slotStart, slotEnd);
-      return { time, availableTables };
+
+      // Calculate total seating capacity
+      const totalCapacity = availableTables.reduce((sum, table) => sum + table.seatingCapacity, 0);
+
+      // Check if the total capacity is sufficient for the number of persons
+      return totalCapacity >= numberOfPersons;
     });
-  
-    console.log("Time slot info:", timeSlotInfo);
-    setAvailableTimes(timeSlotInfo);
-    setReservationData(prevData => ({ ...prevData, timeSlotInfo }));
+
+    console.log("Available time slots:", availableTimeSlots);
+    setAvailableTimes(availableTimeSlots);
   };
 
   const handleTimeSelection = (time) => {
-    const selectedTimeSlot = reservationData.timeSlotInfo.find(slot => slot.time === time);
-    setTablesForSelectedTime(selectedTimeSlot.availableTables);
+    const selectedDateObj = new Date(reservationData.selectedDate);
+    const [hour, minute] = time.split(':').map(Number);
+    const slotStart = new Date(selectedDateObj);
+    slotStart.setHours(hour, minute, 0, 0);
+    const slotEnd = new Date(slotStart.getTime() + 90 * 60000); // 90 minutes later
+
+    const availableTables = getAvailableTables(slotStart, slotEnd);
+    setAvailableTablesForSelectedTime(availableTables);
+
     handleInputChange('selectedTime', time);
     handleNextStep();
+  };
+
+  const getAvailableTables = (slotStart, slotEnd) => {
+    const reservedTableNumbers = new Set();
+    reservations.forEach(reservation => {
+      const resStart = new Date(reservation.startTime);
+      const resEnd = new Date(reservation.endTime);
+      if (slotStart < resEnd && slotEnd > resStart) {
+        reservation.tableNumbers.forEach(tableNumber => reservedTableNumbers.add(tableNumber));
+      }
+    });
+    return availableTables.filter(table => !reservedTableNumbers.has(table.tableNumber));
   };
 
   const handleNextStep = () => {
@@ -319,7 +330,7 @@ function ReservePage() {
 
   return (
     <div className={`reserve-page ${isPageFading ? 'fading' : ''}`}>
-      <h1>Reserve a Table</h1>
+      <h1 className="lead">Reserve a Table</h1>
 
       <ReservationProgress
         currentStep={currentStep}
@@ -328,7 +339,7 @@ function ReservePage() {
       />
 
       {currentStep > 1 && (
-        <button onClick={handlePreviousStep} className="back-button">
+        <button onClick={handlePreviousStep} className="back-button mb-4">
           Back
         </button>
       )}
@@ -363,15 +374,13 @@ function ReservePage() {
       {currentStep === 4 && (
         <TimeSelectionStep
           availableTimes={availableTimes}
-          numberOfPersons={reservationData.numberOfPersons}
           onSelect={handleTimeSelection}
-          openingHours={getSelectedDayOpeningHours()}
         />
       )}
 
       {currentStep === 5 && (
         <TableSelectionStep
-          availableTables={tablesForSelectedTime}
+          availableTables={availableTablesForSelectedTime}
           selectedTables={reservationData.selectedTables}
           numberOfPersons={reservationData.numberOfPersons}
           onSelect={(tables) => handleInputChange('selectedTables', tables)}

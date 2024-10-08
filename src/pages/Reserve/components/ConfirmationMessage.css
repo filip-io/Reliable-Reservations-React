@@ -1,65 +1,131 @@
 .confirmation-message {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.3s ease, visibility 0.3s ease;
-  }
-  
-  .confirmation-message.visible {
-    opacity: 1;
-    visibility: visible;
-  }
-  
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.confirmation-message.visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+.confirmation-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: white;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  max-width: 500px;
+  width: 90%;
+  transform: translateY(20px);
+  opacity: 0;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.confirmation-message.visible .confirmation-content {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.confirmation-message h2 {
+  display: block;
+  background: linear-gradient(45deg, #e905e5eb, #0f0f0f);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  opacity: 0;
+  animation: fadeIn 1s ease-out 0.5s forwards;
+  margin-bottom: 1rem;
+  font-size: 1.6rem;
+}
+
+.confirmation-message p {
+  font-weight: 400;
+}
+
+.reservation-details {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  min-width: 200px;
+  max-width: 200px;
+}
+
+.detail-item {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.detail-item:last-child {
+  border-bottom: none;
+}
+
+.detail-label {
+  font-weight: bold;
+  color: #333;
+}
+
+.detail-value {
+  background: linear-gradient(45deg, #e905e5eb, #0f0f0f);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  opacity: 0;
+  animation: fadeIn 1s ease-out 0.5s forwards;
+}
+
+.confirmation-message button {
+  margin-top: 15px;
+  opacity: 0;
+  animation: fadeIn 1s ease-out 1.5s forwards;
+  transition: all 0.5s ease;
+  padding: 10px 20px;
+  background-color: #bf00ffb7;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.confirmation-message button:hover {
+  background-color: #ff20ff;
+  color: #fff;
+}
+
+@media (max-width: 480px) {
   .confirmation-content {
-    background-color: white;
-    padding: 2rem;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    max-width: 500px;
-    width: 90%;
-    transform: translateY(20px);
+    padding: 1.5rem;
+  }
+
+  .detail-item {
+    flex-direction: column;
+  }
+
+  .detail-value {
+    margin-top: 0.25rem;
+  }
+}
+
+@keyframes fadeIn {
+  from {
     opacity: 0;
-    transition: transform 0.3s ease, opacity 0.3s ease;
+    transform: translateY(20px);
   }
-  
-  .confirmation-message.visible .confirmation-content {
-    transform: translateY(0);
+  to {
     opacity: 1;
+    transform: translateY(0);
   }
-  
-  .confirmation-message h2 {
-    color: #4CAF50;
-    margin-bottom: 1rem;
-  }
-  
-  .confirmation-message ul {
-    list-style-type: none;
-    padding: 0;
-  }
-  
-  .confirmation-message li {
-    margin-bottom: 0.5rem;
-  }
-  
-  .confirmation-message button {
-    margin-top: 1rem;
-    padding: 0.5rem 1rem;
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-  
-  .confirmation-message button:hover {
-    background-color: #45a049;
-  }
+}
