@@ -31,9 +31,10 @@
 
 - 📱 Responsive Design
 
----
+
 &nbsp;
-### ⚙️ Prerequisites
+
+## ⚙️ Prerequisites
 
 - Node.js (v14.0.0 or later)
 - npm (v6.0.0 or later)
