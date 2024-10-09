@@ -18,7 +18,7 @@ function HomePage() {
       <img className="logo-image"
         src={logo}
         alt="Logo"
-        style={{ width: '450px', height: 'auto', margin: '0 10px', marginBottom: '5px' }}
+        style={{ width: '350px', height: 'auto', margin: '15px 10px', marginBottom: '5px' }}
       />
       <Link to="/reserve" className="reserve-button" role="button">
         Reserve a Table

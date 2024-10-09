@@ -2,6 +2,11 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { setDefaultOptions } from 'date-fns';
+import { enGB } from 'date-fns/locale';
+
+// Set the default options to use British English locale, which starts the week on Monday
+setDefaultOptions({ locale: enGB });
 
 const DateSelectionStep = ({ selectedDate, onDateChange, onNext, openingDays }) => {
   const [errorMessage, setErrorMessage] = useState('');
@@ -33,28 +38,28 @@ const DateSelectionStep = ({ selectedDate, onDateChange, onNext, openingDays }) 
 
   return (
     <>
-    <div className="date-selection-step">
-      <h2>Select a Reservation Date</h2>
+      <div className="date-selection-step">
+        <h2>Select a Reservation Date</h2>
 
-      <DatePicker
-        selected={selectedDate ? new Date(selectedDate) : null}
-        onChange={handleDateChange}
-        minDate={new Date()}
-        filterDate={isDateSelectable}
-        inline
-        monthsShown={2}
-        calendarClassName="custom-calendar"
-      />
+        <DatePicker
+          selected={selectedDate ? new Date(selectedDate) : null}
+          onChange={handleDateChange}
+          minDate={new Date()}
+          filterDate={isDateSelectable}
+          inline
+          monthsShown={2}
+          calendarClassName="custom-calendar"
+          locale={enGB}
+        />
 
-      {errorMessage && <p className="text-danger mt-2">{errorMessage}</p>}
+        {errorMessage && <p className="text-danger mt-2">{errorMessage}</p>}
 
-    </div>
-    <div>
-      <button onClick={handleNextClick} disabled={!selectedDate} className="btn btn-primary mt-1">
-        Next
-      </button>
-    </div>
-    
+      </div>
+      <div>
+        <button onClick={handleNextClick} disabled={!selectedDate} className="btn btn-primary mt-1">
+          Next
+        </button>
+      </div>
     </>
   );
 };
