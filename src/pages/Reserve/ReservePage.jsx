@@ -43,12 +43,11 @@ function ReservePage() {
   const [openingDays, setOpeningDays] = useState([]);
   const [openingHours, setOpeningHours] = useState([]);
 
+  // Fetch once on mount or when tables and openinghours have been reset to 0.
   useEffect(() => {
-    if (currentStep > 0) {
-      fetchTables();
-      fetchOpeningHours();
-    }
-  }, [currentStep]);
+    if (availableTables.length === 0) fetchTables();
+    if (openingHours.length === 0) fetchOpeningHours();
+  }, []);
 
   useEffect(() => {
     if (reservationData.selectedDate && reservationData.selectedMeal && availableTables.length > 0) {
@@ -330,15 +329,20 @@ function ReservePage() {
 
   return (
     <div className={`reserve-page ${isPageFading ? 'fading' : ''}`}>
-      <h1 className="lead">Reserve a Table</h1>
+      
+      {currentStep > 1 && currentStep < 8 && (
+        <h1 className="lead">Reserve a Table</h1>
+      )}
 
-      <ReservationProgress
-        currentStep={currentStep}
-        totalSteps={totalSteps}
-        reservationData={reservationData}
-      />
+      {currentStep > 1 && currentStep < 8 && (
+        <ReservationProgress
+          currentStep={currentStep}
+          totalSteps={totalSteps}
+          reservationData={reservationData}
+        />
+      )}
 
-      {currentStep > 1 && (
+      {currentStep > 1 && currentStep < 8 && (
         <button onClick={handlePreviousStep} className="back-button mb-4">
           Back
         </button>

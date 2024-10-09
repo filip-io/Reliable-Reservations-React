@@ -121,7 +121,7 @@
   }
 
   .detail-item {
-    flex-direction: column;
+    flex-direction: row;
   }
 
   .detail-value {

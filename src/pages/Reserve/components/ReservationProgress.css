@@ -75,11 +75,28 @@
 }
 
 @media (max-width: 480px) {
-  .reserve-page .detail-item {
+  .reserve-page .reservation-summary {
+    display: flex;
     flex-direction: column;
+    background-color: #f5f5f5;
+    padding: 15px;
+    border-radius: 5px;
+    margin-top: 20px;
+  }
+
+  .reserve-page .detail-item {
+    flex-direction: row;
+    justify-content: space-between;
+    max-width: 70vw;
   }
 
   .reserve-page .detail-value {
     margin-top: 0.25rem;
+  }
+
+  .reserve-page .reservation-details {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    min-width: 250px;
   }
 }
