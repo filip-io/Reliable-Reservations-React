@@ -7,7 +7,7 @@
 &nbsp;
 
 <div align="center">
-  <img src="./public/images/cover.png" alt="API System Logo" width="50%">
+  <img src="./public/images/cover.png" alt="API System Logo" width="75%">
 </div>
 
 &nbsp;
