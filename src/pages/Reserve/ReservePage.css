@@ -203,12 +203,13 @@ textarea {
 
 /* Responsive design */
 @media (max-width: 768px) {
+  
   .reserve-page h1 {
     font-size: 1.5rem;
   }
 
   .reserve-page {
-    padding: 1rem;
+    padding: 11rem;
   }
 
   .button-group {

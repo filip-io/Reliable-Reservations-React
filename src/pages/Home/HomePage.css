@@ -81,6 +81,14 @@
   }
   
   @media (max-width: 768px) {
+    .main-content {
+      align-items: center;
+    }
+
+    .home-page {
+      padding: 2rem 1rem;
+    }
+  
     .welcome-intro {
       font-size: 1.2rem;
     }
@@ -91,5 +99,11 @@
     
     .culinary-experience {
       font-size: 1rem;
+    }
+  
+    .logo-image {
+      width: 80% !important; 
+      height: auto !important;
+      max-width: 350px;
     }
   }
