@@ -5,7 +5,6 @@ import "react-datepicker/dist/react-datepicker.css";
 import { setDefaultOptions } from 'date-fns';
 import { enGB } from 'date-fns/locale';
 
-// Set the default options to use British English locale, which starts the week on Monday
 setDefaultOptions({ locale: enGB });
 
 const DateSelectionStep = ({ selectedDate, onDateChange, onNext, openingDays }) => {
@@ -18,7 +17,6 @@ const DateSelectionStep = ({ selectedDate, onDateChange, onNext, openingDays }) 
 
   const handleDateChange = (date) => {
     if (isDateSelectable(date)) {
-      // Adjust the date to the local time zone
       const adjustedDate = new Date(date.getTime() - (date.getTimezoneOffset() * 60000));
       const formattedDate = adjustedDate.toISOString().split('T')[0];
       onDateChange(formattedDate);

@@ -43,7 +43,7 @@ function ReservePage() {
   const [openingDays, setOpeningDays] = useState([]);
   const [openingHours, setOpeningHours] = useState([]);
 
-  // Fetch once on mount or when tables and openinghours have been reset to 0.
+  // Fetch once on mount or when tables and openinghours have been reset to 0
   useEffect(() => {
     if (availableTables.length === 0) fetchTables();
     if (openingHours.length === 0) fetchOpeningHours();
@@ -279,7 +279,6 @@ function ReservePage() {
       }, 300);
     } catch (error) {
       console.error("Error posting reservation:", error);
-      // Handle error (e.g., show error message)
     }
   };
 
