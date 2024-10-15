@@ -43,27 +43,29 @@ const InitialStep = ({ onBegin }) => {
 
   return (
     <div className="initial-step">
-      <h4 className="mt-4 mb-5">Click 'Begin' to start the reservation process</h4>
+      <h4 className="mb-3">
+        Let's get started with your reservation
+      </h4>
       {error && (
         <div style={errorStyle} role="alert">
           <span style={errorIconStyle} aria-hidden="true">⚠️</span>
           <span>{error}</span>
         </div>
       )}
-      <button 
-        onClick={handleBegin} 
+      <button
+        onClick={handleBegin}
         disabled={isChecking}
         style={{
           padding: '10px 20px',
           fontSize: '16px',
-          backgroundColor: isChecking ? '#cccccc' : '#4CAF50',
+          backgroundColor: isChecking ? '#cccccc' : '#2dll23',
           color: 'white',
           border: 'none',
           borderRadius: '4px',
           cursor: isChecking ? 'not-allowed' : 'pointer',
         }}
       >
-        {isChecking ? 'Checking...' : 'Begin'}
+        {isChecking ? 'CHECKING...' : 'START'}
       </button>
     </div>
   );
