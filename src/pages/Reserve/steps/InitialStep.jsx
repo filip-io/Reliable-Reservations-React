@@ -44,7 +44,7 @@ const InitialStep = ({ onBegin }) => {
   return (
     <div className="initial-step">
       <h4 className="mb-3">
-        Let's get started with your reservation
+        Let's get started with your reservation!
       </h4>
       {error && (
         <div style={errorStyle} role="alert">

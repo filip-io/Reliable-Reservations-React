@@ -45,6 +45,7 @@ function ReservePage() {
 
   const [availableTimes, setAvailableTimes] = useState([]);
   const [isReservationConfirmed, setIsReservationConfirmed] = useState(false);
+  const [reservationError, setReservationError] = useState(null);
   const [isPageFading, setIsPageFading] = useState(false);
 
   // Update available times when date, meal, or tables change
@@ -166,6 +167,12 @@ function ReservePage() {
       }, 300);
     } catch (error) {
       console.error("Error posting reservation:", error);
+      console.log("Error details:", {
+        message: error.message,
+        stack: error.stack,
+        name: error.name
+      });
+      setReservationError(error.message || "An error occurred while submitting your reservation.");
     }
   };
 
@@ -207,6 +214,7 @@ function ReservePage() {
   };
 
   if (isReservationConfirmed) {
+    console.log('Restervation confirmed: ', isReservationConfirmed)
     return (
       <ConfirmationMessage
         reservationData={reservationData}
@@ -307,6 +315,7 @@ function ReservePage() {
           reservationData={reservationData}
           onConfirm={handleSubmit}
           onEdit={handleEdit}
+          error={reservationError}
         />
       )}
     </div>

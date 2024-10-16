@@ -2,7 +2,7 @@ import React from 'react';
 import { useState, useEffect } from 'react'
 import PropTypes from 'prop-types';
 
-const ConfirmationStep = ({ reservationData, onConfirm, onEdit }) => {
+const ConfirmationStep = ({ reservationData, onConfirm, onEdit, error }) => {
   const [buttonsEnabled, setButtonsEnabled] = useState(false);
 
   // Enable buttons after a delay
@@ -15,9 +15,37 @@ const ConfirmationStep = ({ reservationData, onConfirm, onEdit }) => {
     return () => clearTimeout(timer);
   }, []);
 
+  const errorStyle = {
+    backgroundColor: '#ffebee',
+    color: '#d32f2f',
+    padding: '10px',
+    borderRadius: '4px',
+    marginBottom: '15px',
+    border: '1px solid #ffcdd2',
+    fontSize: '14px',
+    lineHeight: '1.5',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+  };
+
+  const errorIconStyle = {
+    marginBottom: '10px',
+    fontSize: '20px',
+  };
+
   return (
     <div className="confirmation-step">
       <h2>Confirm Your Reservation</h2>
+      {error && (
+        <div style={errorStyle} role="alert">
+          <span style={errorIconStyle} aria-hidden="true">⚠️</span>
+          <span className="mb-3">There was a problem confirming your reservation:</span>
+          <span className="mb-3 fw-semibold">{error}</span>
+          <span>Please try confirming again. <br /> If problems persist, please try again later.</span>
+        </div>
+      )}
       <div className="reservation-summary">
         <div className="reservation-details">
           {reservationData.selectedMeal && (
@@ -107,6 +135,7 @@ ConfirmationStep.propTypes = {
   }).isRequired,
   onConfirm: PropTypes.func.isRequired,
   onEdit: PropTypes.func.isRequired,
+  error: PropTypes.string,
 };
 
 export default ConfirmationStep;
